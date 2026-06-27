@@ -904,7 +904,7 @@
       produk dan teknologi. Let's engineer the future together.
     </p>
     <div class="footer__actions reveal">
-      <a class="btn btn--primary" href="mailto:purbamarstella@gmail.com?subject=Peluang%20Kolaborasi%20dengan%20Marstella&body=Halo%20Marstella,%0A%0ASaya%20melihat%20portofolio%20kamu%20dan%20tertarik%20untuk%20berdiskusi%20lebih%20lanjut%20mengenai..." aria-label="Kirim email ke Marstella">
+      <a class="btn btn--primary" href="mailto:purbamarstella@gmail.com?subject=Peluang%20Kolaborasi%20dengan%20Marstella&body=Halo%20Marstella,%0A%0ASaya%20melihat%20portofolio%20kamu%20dan%20tertarik%20untuk%20berdiskusi%20lebih%20lanjut%20mengenai..." aria-label="Kirim email ke Marstella" id="emailMeBtn">
         <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.125rem;">mail</span>
         Email Me
         </a>
@@ -1024,6 +1024,35 @@
   slider.addEventListener('touchstart', e => startDrag(e.touches[0].pageX), { passive: true });
   slider.addEventListener('touchmove',  e => moveDrag(e.touches[0].pageX),  { passive: true });
   slider.addEventListener('touchend',   endDrag);
+
+  // Fallback untuk tombol "Email Me": kalau mailto: tidak berhasil membuka
+  // aplikasi email (device tidak punya default mail client terkonfigurasi),
+  // otomatis buka Gmail compose di tab baru sebagai cadangan.
+  const emailBtn = document.getElementById('emailMeBtn');
+  if (emailBtn) {
+    emailBtn.addEventListener('click', function (e) {
+      const to = 'purbamarstella@gmail.com';
+      const subject = 'Peluang Kolaborasi dengan Marstella';
+      const body = "Halo Marstella,\n\nSaya melihat portofolio kamu dan tertarik untuk berdiskusi lebih lanjut mengenai...";
+
+      // Biarkan browser coba buka mailto: dulu (perilaku default <a>).
+      // Jika tab/halaman masih terlihat (fokus tidak berpindah ke app lain)
+      // setelah beberapa saat, anggap mailto: gagal dan buka Gmail compose.
+      const fallbackTimer = setTimeout(function () {
+        const gmailUrl =
+          'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(to) +
+          '&su=' + encodeURIComponent(subject) +
+          '&body=' + encodeURIComponent(body);
+        window.open(gmailUrl, '_blank');
+      }, 800);
+
+      // Kalau user pindah tab/app (mailto: berhasil), batalkan fallback.
+      window.addEventListener('blur', function cancelFallback() {
+        clearTimeout(fallbackTimer);
+        window.removeEventListener('blur', cancelFallback);
+      });
+    });
+  }
 </script>
 
 </body>
